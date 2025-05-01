@@ -1,11 +1,22 @@
 
 import requests
 import time
+from threading import Thread
+from flask import Flask
 
 TOKEN = "7761435776:AAFUZjqj9BUxfMWI12Re6H3Tvx3Qb66FblE"
 CHANNEL = "@animeblisshub"
 API_URL = "https://api.telegram.org/bot" + TOKEN
 WAIFU_API = "https://waifu.pics/api/sfw/waifu"
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot is running!", 200
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
 
 def get_waifu_image():
     res = requests.get(WAIFU_API)
@@ -22,6 +33,7 @@ def send_photo_to_channel(photo_url):
     requests.post(API_URL + "/sendPhoto", data=data)
 
 if __name__ == "__main__":
+    Thread(target=run_flask).start()
     while True:
         img_url = get_waifu_image()
         if img_url:
