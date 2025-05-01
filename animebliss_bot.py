@@ -19,9 +19,12 @@ def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
 def get_waifu_image():
-    res = requests.get(WAIFU_API)
-    if res.status_code == 200:
-        return res.json().get("url")
+    try:
+        res = requests.get(WAIFU_API)
+        if res.status_code == 200:
+            return res.json().get("url")
+    except Exception as e:
+        print("Error fetching image:", e)
     return None
 
 def send_photo_to_channel(photo_url):
@@ -30,15 +33,19 @@ def send_photo_to_channel(photo_url):
         "photo": photo_url,
         "caption": "Today’s featured anime girl ✨\nFollow @animeblisshub for more~"
     }
-    requests.post(API_URL + "/sendPhoto", data=data)
+    try:
+        res = requests.post(API_URL + "/sendPhoto", data=data)
+        print("POST status:", res.status_code)
+    except Exception as e:
+        print("Error sending photo:", e)
 
 if __name__ == "__main__":
     Thread(target=run_flask).start()
     while True:
         img_url = get_waifu_image()
         if img_url:
+            print("Sending image:", img_url)
             send_photo_to_channel(img_url)
-            print("Sent:", img_url)
         else:
-            print("Failed to get image.")
-        time.sleep(10800)  # 3 hours
+            print("No image to send.")
+        time.sleep(60)  # every 1 minute
