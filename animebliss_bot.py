@@ -41,4 +41,4 @@ if __name__ == "__main__":
             print("Sent:", img_url)
         else:
             print("Failed to get image.")
-        time.sleep(10800)  # 3 hours
+        time.sleep(60)  # 3 hours
