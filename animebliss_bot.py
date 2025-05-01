@@ -10,7 +10,7 @@ TOKEN = "7761435776:AAFUZjqj9BUxfMWI12Re6H3Tvx3Qb66FblE"
 CHANNEL = "@animeblisshub"
 API_URL = "https://api.telegram.org/bot" + TOKEN
 WAIFU_API = "https://waifu.pics/api/sfw/waifu"
-POST_INTERVAL_SECONDS = 7200  # 2 hours
+POST_INTERVAL_SECONDS = 60  # 2 hours
 
 # === Flask Setup ===
 app = Flask(__name__)
