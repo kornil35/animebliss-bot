@@ -10,9 +10,9 @@ TOKEN = "7761435776:AAFUZjqj9BUxfMWI12Re6H3Tvx3Qb66FblE"
 CHANNEL = "@animeblisshub"
 API_URL = "https://api.telegram.org/bot" + TOKEN
 WAIFU_API = "https://waifu.pics/api/sfw/waifu"
-POST_INTERVAL_SECONDS = 60  # Change to 1800 for 30 min or 3600 for 1 hour
+POST_INTERVAL_SECONDS = 60  # For testing. Change to 1800 (30 min) for production
 
-# === Flask Setup for Render pinging ===
+# === Flask Setup ===
 app = Flask(__name__)
 
 @app.route("/")
@@ -22,7 +22,7 @@ def home():
 def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
-# === More human-like caption pool ===
+# === Caption Pool ===
 CAPTIONS = [
     "She’s kinda cute, not gonna lie 😳\nFollow @animeblisshub",
     "Saw her and thought of you 💙\nFollow @animeblisshub",
@@ -36,22 +36,19 @@ CAPTIONS = [
     "Okay but why does she kinda go hard 🔥\nFollow @animeblisshub",
     "Daily reminder that 2D > 3D 💯\nFollow @animeblisshub",
     "Caught you looking 😏\nFollow @animeblisshub",
-    "She’s not even trying and still perfect 🥲\nFollow @animeblisshub",
     "Just a little gift for your timeline 🎁\nFollow @animeblisshub",
     "Too wholesome for this world 🌍\nFollow @animeblisshub",
-    "Tell me she’s not elite. I dare you 😤\nFollow @animeblisshub",
     "Sometimes you just need to stop and stare 🫶\nFollow @animeblisshub",
-    "Soft, sweet, and deadly… just your type, right?\nFollow @animeblisshub",
+    "Tell me she’s not elite. I dare you 😤\nFollow @animeblisshub",
     "You’re welcome, btw 😌\nFollow @animeblisshub",
     "Bet this is your new wallpaper 💻\nFollow @animeblisshub",
-    "She’s giving 'main character energy' 🔮\nFollow @animeblisshub",
-    "Rate her out of 10. I dare you 💯\nFollow @animeblisshub",
-    "When she appears, everything else fades away ✨\nFollow @animeblisshub",
-    "If she smiled at you, your whole day would be better 😭\nFollow @animeblisshub",
-    "Don’t scroll past. This is peak 🍥\nFollow @animeblisshub"
+    "She’s giving 'main character energy' 🔮\nFollow @animeblisshub"
 ]
 
-# === Core Functions ===
+# === Hashtag comment ===
+HASHTAGS = "#anime #waifu #cutegirl #2dgirls #aesthetic #animebliss #manga #animeart #dailywaifu"
+
+# === Core Bot Logic ===
 def get_waifu_image():
     try:
         res = requests.get(WAIFU_API)
@@ -61,7 +58,7 @@ def get_waifu_image():
         print("Error fetching image:", e)
     return None
 
-def send_photo_to_channel(photo_url, caption):
+def send_photo_and_comment(photo_url, caption):
     data = {
         "chat_id": CHANNEL,
         "photo": photo_url,
@@ -70,10 +67,20 @@ def send_photo_to_channel(photo_url, caption):
     try:
         res = requests.post(API_URL + "/sendPhoto", data=data)
         print("POST status:", res.status_code)
+        if res.status_code == 200:
+            result = res.json()
+            message_id = result["result"]["message_id"]
+            # Add comment with hashtags
+            comment = {
+                "chat_id": CHANNEL,
+                "text": HASHTAGS,
+                "reply_to_message_id": message_id
+            }
+            requests.post(API_URL + "/sendMessage", data=comment)
     except Exception as e:
-        print("Error sending photo:", e)
+        print("Error sending photo/comment:", e)
 
-# === Run Everything ===
+# === Launch ===
 if __name__ == "__main__":
     Thread(target=run_flask).start()
     while True:
@@ -81,7 +88,7 @@ if __name__ == "__main__":
         caption = random.choice(CAPTIONS)
         if img_url:
             print("Sending:", img_url)
-            send_photo_to_channel(img_url, caption)
+            send_photo_and_comment(img_url, caption)
         else:
             print("No image retrieved.")
         time.sleep(POST_INTERVAL_SECONDS)
